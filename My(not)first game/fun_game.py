@@ -44,22 +44,83 @@ def main():
     x = SCREEN_WIDTH//2
     y = SCREEN_HEIGHT//2
 
-    class player:
-        def __init__(self):
-            self.radius: int
-            self.speed: float
-            self.x: float  
-            self.y: float
-            self.vx: float
-            self.vy: float
-            self.ax: float
-            self.ay: float 
-
-    player1 = player()
+    bodies = {}
 
 
+    class body():
+
+        instances = []
+
+        def __init__(self, radius = 0, color = "BLUE", speed = 1.0, x = SCREEN_WIDTH/2, y = SCREEN_HEIGHT/2, vx = 0.0, vy = 0.0, ax = 0.0, ay = 0.0):
+            self.radius: int = radius
+            self.color: str = color
+            self.speed: float = speed
+            self.x: float = x
+            self.y: float = y
+            self.vx: float = vx
+            self.vy: float = vy
+            self.ax: float = ax
+            self.ay: float = ay 
+
+            body.instances.append(self)
+
+        def process():
+            
+            for me in body.instances:
+                
+                #controls
+                
+                if keys[pygame.K_a]:
+                    me.vx -= me.speed
+                
+                if keys[pygame.K_d]:
+                    me.vx += me.speed
+                
+                if keys[pygame.K_w]:
+                    me.vy -= me.speed
+                
+                if keys[pygame.K_s]:
+                    me.vy += me.speed
+
+                #bounce
+
+                if me.x > SCREEN_WIDTH - me.radius or me.x < 0 + me.radius:
+                    me.vx *= -.8
+                if me.y > SCREEN_HEIGHT - me.radius or me.y < 0 + me.radius:
+                    me.vy *= -.8
+
+                if me.x > SCREEN_WIDTH - me.radius:
+                    me.x -= 1
+                if me.x < 0 + me.radius:
+                    me.x += 1
+        
+                if me.y > SCREEN_HEIGHT - me.radius:
+                    me.y -= 1
+                if me.y < 0 + me.radius:
+                    me.y += 1
+
+                #friction
+
+                # if me.vx > 0:
+                #     me.vx -= me.speed / 4
+                # elif me.vx < 0:
+                #     me.vx += me.speed / 4
+                
+                # if me.vy > 0:
+                #     me.vy -= me.speed / 4
+                # elif me.vy < 0:
+                #     me.vy += me.speed / 4
+
+
+                me.x += me.vx
+                me.y += me.vy
+
+
+                pygame.draw.circle(SCREEN,me.color,(me.x,me.y),me.radius)   
+    bodies = 5000
+    for object in range(bodies):
+        body(50,BLUE,1,random.randrange(1,SCREEN_WIDTH),random.randrange(1,SCREEN_HEIGHT))
     
-
     #Game Loop
     is_running = True
     while is_running == True:
@@ -71,135 +132,19 @@ def main():
 
         SCREEN.fill(BLACK)
 
-        #gets velocities
-        
-            #p1
 
-        if keys[pygame.K_a]:
-            p1_vx -= p1_speed
-        
-        if keys[pygame.K_d]:
-            p1_vx += p1_speed
-        
-        if keys[pygame.K_w]:
-            p1_vy -= p1_speed
-        
-        if keys[pygame.K_s]:
-            p1_vy += p1_speed
+        e_pressed = False
+        if keys[pygame.K_e] and e_pressed == False:
+            body(random.randrange(10,150))
+            e_pressed = True
+        if not keys[pygame.K_e]:
+            e_pressed = False
 
-            #p2
-
-        if keys[pygame.K_LEFT]:
-            p2_vx -= p2_speed
-                
-        if keys[pygame.K_RIGHT]:
-            p2_vx += p2_speed
-                
-        if keys[pygame.K_UP]:
-            p2_vy -= p2_speed
-                
-        if keys[pygame.K_DOWN]:
-            p2_vy += p2_speed
-
-        #makes players bounce off of walls
-
-            #p1
-
-        if player1.x > SCREEN_WIDTH - p1_r or player1.x < 0 + p1_r:
-            if p1_hb == False:
-                p1_vx *= -1 * p1_bounciness
-                p1_hb = True
-        if player1.y > SCREEN_HEIGHT - p1_r or player1.y < 0 + p1_r:
-            if p1_hb == False:
-                p1_vy *= -1 * p1_bounciness
-                p1_hb = True
-
-        if player1.x < SCREEN_WIDTH - p1_r or player1.x > 0 + p1_r:
-            p1_hb = False
-        if player1.y < SCREEN_HEIGHT - p1_r or player1.y > 0 + p1_r:
-            p1_hb = False
-
-        if player1.x > SCREEN_WIDTH - p1_r:
-            player1.x -= 1
-        if player1.x < 0 + p1_r:
-            player1.x += 1
-
-        if player1.y > SCREEN_HEIGHT - p1_r:
-            player1.y -= 1
-        if player1.y < 0 + p1_r:
-            player1.y += 1
-
-            #p2
-
-        if player2.x > SCREEN_WIDTH - p2_r or player2.x < 0 + p2_r:
-            if p2_hb == False:
-                p2_vx *= -1 * p2_bounciness
-                p2_hb = True
-        if player2.y > SCREEN_HEIGHT - p2_r or player2.y < 0 + p2_r:
-            if p2_hb == False:
-                p2_vy *= -1 * p2_bounciness
-                p2_hb = True
-
-        if player2.x < SCREEN_WIDTH - p2_r or player2.x > 0 + p2_r:
-            p2_hb = False
-        if player2.y < SCREEN_HEIGHT - p2_r or player2.y > 0 + p2_r:
-            p2_hb = False
-
-        if player2.x > SCREEN_WIDTH - p2_r:
-            player2.x -= 1
-        if player2.x < 0 + p2_r:
-            player2.x += 1
-
-        if player2.y > SCREEN_HEIGHT - p2_r:
-            player2.y -= 1
-        if player2.y < 0 + p2_r:
-            player2.y += 1
-
-        #adds friction to velocity
-
-            #p1
-
-        if p1_vx > 0:
-            p1_vx -= p1_speed / 4
-        elif p1_vx < 0:
-            p1_vx += p1_speed / 4
-        
-        if p1_vy > 0:
-            p1_vy -= p1_speed / 4
-        elif p1_vy < 0:
-            p1_vy += p1_speed / 4
-
-            #p2
-
-        if p2_vx > 0:
-            p2_vx -= p2_speed / 4
-        elif p2_vx < 0:
-            p2_vx += p2_speed / 4
-                
-        if p2_vy > 0:
-            p2_vy -= p2_speed / 4
-        elif p2_vy < 0:
-            p2_vy += p2_speed / 4
-
-
-        #add velocity to positions
-
-            #p1
-
-        player1.x += p1_vx
-        player1.y += p1_vy
-
-            #p2
-
-        player2.x += p2_vx
-        player2.y += p2_vy
-
-        pygame.draw.circle(SCREEN,BLUE,(player1.x,player1.y),p1_r)
-        pygame.draw.circle(SCREEN,RED,(player2.x,player2.y),p2_r)
+        body.process()
 
         pygame.display.flip()
 
-        clock.tick(120)
+        clock.tick(240)
 #conditional execution
 
 if __name__ == "__main__":
