@@ -10,10 +10,9 @@ Project: Fun Game
 import pygame
 import random
 import time
+import math
 
 #User Functions
-
-
 
 #main function
 
@@ -41,6 +40,10 @@ def main():
     #define some things idk
     clock = pygame.time.Clock()
 
+    G = 0.000000000067
+
+    lmb_pressed = False
+
     x = SCREEN_WIDTH//2
     y = SCREEN_HEIGHT//2
 
@@ -51,9 +54,10 @@ def main():
 
         instances = []
 
-        def __init__(self, radius = 0, color = "BLUE", speed = 1.0, x = SCREEN_WIDTH/2, y = SCREEN_HEIGHT/2, vx = 0.0, vy = 0.0, ax = 0.0, ay = 0.0):
+        def __init__(self, radius = 0, color = "BLUE", mass = 1, speed = 1.0, x = SCREEN_WIDTH/2, y = SCREEN_HEIGHT/2, vx = 0.0, vy = 0.0, ax = 0.0, ay = 0.0, fx = 0.0, fy = 0.0):
             self.radius: int = radius
             self.color: str = color
+            self.mass: int = mass
             self.speed: float = speed
             self.x: float = x
             self.y: float = y
@@ -61,33 +65,51 @@ def main():
             self.vy: float = vy
             self.ax: float = ax
             self.ay: float = ay 
+            self.fx: float = fx
+            self.fy:float = fy
 
             body.instances.append(self)
 
+        def apply_gravity():
+            for me in body.instances:
+                for other_body in body.instances:
+                    if other_body == me:
+                        pass
+                    else:
+                            dx = other_body.x - me.x + .01
+                            dy = other_body.y - me.y + .01
+
+                            distance = math.sqrt((dx * dx) + (dy * dy)) + .01
+
+                            force = (me.mass * other_body.mass) * (distance * distance) * G
+
+                            me.fx += force / (dx / distance)
+                            me.fy += force / (dy / distance)
+                        
         def process():
             
             for me in body.instances:
                 
                 #controls
                 
-                if keys[pygame.K_a]:
-                    me.vx -= me.speed
+                # if keys[pygame.K_a]:
+                #     me.vx -= me.speed
                 
-                if keys[pygame.K_d]:
-                    me.vx += me.speed
+                # if keys[pygame.K_d]:
+                #     me.vx += me.speed
                 
-                if keys[pygame.K_w]:
-                    me.vy -= me.speed
+                # if keys[pygame.K_w]:
+                #     me.vy -= me.speed
                 
-                if keys[pygame.K_s]:
-                    me.vy += me.speed
+                # if keys[pygame.K_s]:
+                #     me.vy += me.speed
 
                 #bounce
 
                 if me.x > SCREEN_WIDTH - me.radius or me.x < 0 + me.radius:
-                    me.vx *= -.8
+                    me.vx *= -1
                 if me.y > SCREEN_HEIGHT - me.radius or me.y < 0 + me.radius:
-                    me.vy *= -.8
+                    me.vy *= -1
 
                 if me.x > SCREEN_WIDTH - me.radius:
                     me.x -= 1
@@ -111,16 +133,20 @@ def main():
                 # elif me.vy < 0:
                 #     me.vy += me.speed / 4
 
+                me.ax = me.fx / me.mass
+                me.ay = me.fx / me.mass
+
+                me.vx += me.ax
+                me.vy += me.ax
 
                 me.x += me.vx
                 me.y += me.vy
 
+                me.fx = 0
+                me.fy = 0
 
                 pygame.draw.circle(SCREEN,me.color,(me.x,me.y),me.radius)   
-    bodies = 5000
-    for object in range(bodies):
-        body(50,BLUE,1,random.randrange(1,SCREEN_WIDTH),random.randrange(1,SCREEN_HEIGHT))
-    
+                
     #Game Loop
     is_running = True
     while is_running == True:
@@ -132,19 +158,19 @@ def main():
 
         SCREEN.fill(BLACK)
 
-
-        e_pressed = False
-        if keys[pygame.K_e] and e_pressed == False:
-            body(random.randrange(10,150))
-            e_pressed = True
-        if not keys[pygame.K_e]:
-            e_pressed = False
-
+        mouse_pos = pygame.mouse.get_pos()
+        print(mouse_pos)
+        
+        if pygame.mouse.get_just_pressed()[0]:
+            body(20,BLUE,1,10000,mouse_pos[0],mouse_pos[1])
+        
+        body.apply_gravity()
         body.process()
 
         pygame.display.flip()
 
         clock.tick(240)
+
 #conditional execution
 
 if __name__ == "__main__":
